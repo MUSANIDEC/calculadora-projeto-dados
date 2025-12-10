@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Projetos de Dados v2.1</title>
+    <style>
+        :root {
+            /* Cores baseadas no print (Tons de Verde/Excel) */
+            --primary: #107c41; /* Excel Green */
+            --primary-dark: #0b5c2f;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --border: #d1d5db;
+            --header-bg: #e6f4ea;
+            --danger: #dc2626;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        @media (max-width: 1000px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+        }
+        .card-header h1 { margin: 0; font-size: 1.4rem; }
+
+        .card-body { padding: 25px; }
+
+        /* Sections Styles */
+        .section-box {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: var(--header-bg);
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary-dark);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge-number {
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+
+        input[type="number"], select, input[type="text"] {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.1);
+        }
+
+        /* Checkbox Grid for Systems */
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+            background: #fafafa;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        /* Results Panel */
+        .results-panel { position: sticky; top: 20px; height: fit-content; border-top: 5px solid var(--primary); }
+        .result-section { padding: 20px; border-bottom: 1px solid #eee; }
+        
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .cost-label { font-size: 0.9rem; color: #555; }
+        .cost-val { font-weight: bold; font-size: 1.1rem; }
+
+        .total-box {
+            background-color: #ecfdf5;
+            padding: 20px;
+            text-align: center;
+        }
+        .total-val { font-size: 2rem; font-weight: 800; color: var(--primary); display: block; margin: 10px 0;}
+
+        /* Config Details */
+        details { margin-bottom: 15px; border: 1px dashed #ccc; padding: 10px; border-radius: 4px; }
+        summary { cursor: pointer; color: #666; font-size: 0.9rem; }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 4px;
+        }
+        .btn:hover { background-color: var(--primary-dark); }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background-color: #f0fdf4; }
+
+        /* Badges de alerta */
+        .badge-alert {
+            font-size: 0.75rem;
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            display: none; /* Oculto por padrão */
+        }
+        .badge-alert.active { display: inline-block; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>📊 Calculadora de Escopo & Custos</h1>
+        </div>
+        <div class="card-body">
+            
+            <details>
+                <summary>⚙️ Configurar Valor Hora (R$)</summary>
+                <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 0;">
+                    <div class="input-group"><label>Ingestão</label><input type="number" id="rate-ing" value="176"></div>
+                    <div class="input-group"><label>Engenharia</label><input type="number" id="rate-eng" value="200"></div>
+                    <div class="input-group"><label>Visualização</label><input type="number" id="rate-viz" value="150"></div>
+                    <div class="input-group"><label>PO/Gestão</label><input type="number" id="rate-pm" value="170"></div>
+                </div>
+            </details>
+
+            <form id="calcForm" oninput="calculate()">
+
+                <div class="section-box">
+                    <div class="section-header"><span class="badge-number">1</span> Ingestão de Dados</div>
+                    <div class="form-grid">
+                        <div class="input-group" style="grid-column: 1 / -1;">
+                            <label>Sistemas (Fontes de dados)</label>
+                            <div class="systems-grid">
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="SAP"> SAP</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="Excel"> Excel/CSV</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="GoogleSheets"> G. Sheets</label>
+                                
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="Oracle"> Oracle</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="Salesforce"> Salesforce</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="4thShift"> 4th Shift</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="AX"> AX</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="MES"> MES</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="Windchill"> Windchill</label>
+                                <label class="checkbox-label"><input type="checkbox" class="sys-chk" value="Outro"> Outro</label>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Total de Tabelas (Soma)</label>
+                            <input type="number" id="in_tables" value="5" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Usa Legados / Web Scraping / PDF?</label>
+                            <select id="in_legacy">
+                                <option value="1">Não</option>
+                                <option value="1.3">Sim (+ Complexidade)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header"><span class="badge-number">2</span> Engenharia de Dados</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Qtd. Campos Calculados (KPIs)</label>
+                            <input type="number" id="eng_kpis" value="5" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Qualidade dos dados na origem?</label>
+                            <select id="eng_quality">
+                                <option value="1.4">Baixa (Muito tratamento)</option>
+                                <option value="1.2" selected>Média</option>
+                                <option value="1.0">Alta (Dados limpos)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Necessidade de Carga Histórica?</label>
+                            <select id="eng_history">
+                                <option value="1.0">Só Atual (D-1)</option>
+                                <option value="1.2">Histórico + Atual</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Frequência (Latência)</label>
+                            <select id="eng_freq">
+                                <option value="1.0">Diário/Semanal (Batch)</option>
+                                <option value="1.1">Intraday (Algumas vezes/dia)</option>
+                                <option value="1.5">Near-Real-Time (Streaming)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Dados Sensíveis (LGPD)?</label>
+                            <select id="eng_sensitive">
+                                <option value="1.0">Não</option>
+                                <option value="1.1">Sim (+ Segurança)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Uso de Inteligência Artificial?</label>
+                            <select id="eng_ai">
+                                <option value="1.0">Não</option>
+                                <option value="1.3">Sim (+ Modelagem)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="grid-column: 1 / -1;">
+                            <label>Custo estimado Nuvem/Infra (R$)</label>
+                            <input type="number" id="eng_cloud_cost" value="0" placeholder="Ex: 500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header"><span class="badge-number">3</span> Visualização (Data Viz)</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Quantas telas (Dashboards)?</label>
+                            <input type="number" id="viz_screens" value="1" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Tipo de Dashboard</label>
+                            <select id="viz_type">
+                                <option value="1.0">Operacional (Tabelas/Filtros)</option>
+                                <option value="1.5">Executivo (Storytelling/UX)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header"><span class="badge-number">4</span> PO & Gerenciamento</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Qualidade Documentação</label>
+                            <select id="po_doc">
+                                <option value="1.0">Completa</option>
+                                <option value="1.15">Parcial</option>
+                                <option value="1.3">Inexistente (Entendimento alto)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Disponibilidade Área Negócio</label>
+                            <select id="po_avail">
+                                <option value="1.0">Alta</option>
+                                <option value="1.1">Média</option>
+                                <option value="1.25">Baixa (Risco de atraso)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Natureza</label>
+                            <select id="po_nature">
+                                <option value="1.0">Automação (Processo claro)</option>
+                                <option value="1.2">Inovação (Incerto/P&D)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card results-panel">
+        <div class="card-header">
+            <h2>💰 Estimativa Financeira</h2>
+        </div>
+        
+        <div class="result-section">
+            <div class="cost-row">
+                <div>
+                    <div class="cost-label">Ingestão <span id="badge-complex" class="badge-alert">Alta Complexidade (30x)</span></div>
+                    <small id="res_h_ing">0h</small>
+                </div>
+                <div class="cost-val" id="res_c_ing">R$ 0,00</div>
+            </div>
+            <div class="cost-row">
+                <div>
+                    <div class="cost-label">Engenharia</div>
+                    <small id="res_h_eng">0h</small>
+                </div>
+                <div class="cost-val" id="res_c_eng">R$ 0,00</div>
+            </div>
+            <div class="cost-row">
+                <div>
+                    <div class="cost-label">Visualização</div>
+                    <small id="res_h_viz">0h</small>
+                </div>
+                <div class="cost-val" id="res_c_viz">R$ 0,00</div>
+            </div>
+            <div class="cost-row">
+                <div>
+                    <div class="cost-label">PO & Gestão</div>
+                    <small id="res_h_pm">0h</small>
+                </div>
+                <div class="cost-val" id="res_c_pm">R$ 0,00</div>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+            
+            <div class="cost-row">
+                <div>
+                    <div class="cost-label">Custo Cloud/Infra</div>
+                    <small>(Pass-through)</small>
+                </div>
+                <div class="cost-val" id="res_c_cloud" style="color: #666;">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="total-box">
+            <span style="color: #047857; font-weight:600;">INVESTIMENTO TOTAL</span>
+            <span class="total-val" id="res_total">R$ 0,00</span>
+            <small id="res_days" style="color: #047857;">~0 dias úteis</small>
+        </div>
+        
+        <div style="padding: 20px;">
+            <button class="btn" onclick="window.print()">🖨️ Salvar PDF</button>
+            <button class="btn btn-secondary" onclick="copySummary()">📋 Copiar Resumo</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    }
+
+    function calculate() {
+        // --- 0. RATES ---
+        const rateIng = parseFloat(document.getElementById('rate-ing').value);
+        const rateEng = parseFloat(document.getElementById('rate-eng').value);
+        const rateViz = parseFloat(document.getElementById('rate-viz').value);
+        const ratePm = parseFloat(document.getElementById('rate-pm').value);
+
+        // --- 1. INGESTÃO ---
+        // 1.1 Identificar sistemas selecionados
+        const checkboxes = document.querySelectorAll('.sys-chk:checked');
+        const selectedSystems = Array.from(checkboxes).map(cb => cb.value);
+        const numSystems = selectedSystems.length;
+
+        // 1.2 Lógica de Complexidade (O ajuste solicitado)
+        const standardSystems = ["SAP", "GoogleSheets", "Excel"];
+        // Se houver algum sistema selecionado que NÃO seja padrão, hasComplexSystem é true
+        const hasComplexSystem = selectedSystems.some(sys => !standardSystems.includes(sys));
+        
+        // Multiplicador: Se tiver complexo = 30x, senão = 1x
+        // (Garantindo que se não houver sistema nenhum selecionado, mantemos 1 para não zerar se o usuário só colocar tabelas, ou zero se preferir)
+        let complexityMult = 1;
+        if (numSystems > 0 && hasComplexSystem) {
+            complexityMult = 30;
+        }
+
+        // Atualiza a UI para mostrar o aviso de alta complexidade
+        const badge = document.getElementById('badge-complex');
+        if (hasComplexSystem) {
+            badge.classList.add('active');
+        } else {
+            badge.classList.remove('active');
+        }
+
+        // 1.3 Outros Inputs
+        const numTables = parseInt(document.getElementById('in_tables').value) || 0;
+        const legacyMult = parseFloat(document.getElementById('in_legacy').value);
+    
+        // 1.4 Fórmula Atualizada
+        // Lógica: ((8h por sistema) + (4h por tabela)) * Legado * Complexidade(30 ou 1)
+        // Nota: Ajustei tabelas de 40 para 4 para manter a sanidade com o multiplicador de 30x.
+        let h_ing = ((numSystems * complexityMult) + (numTables * 40)) * legacyMult;
+
+
+        // --- 2. ENGENHARIA ---
+        const numKpis = parseInt(document.getElementById('eng_kpis').value) || 0;
+        const qualityMult = parseFloat(document.getElementById('eng_quality').value);
+        const historyMult = parseFloat(document.getElementById('eng_history').value);
+        const freqMult = parseFloat(document.getElementById('eng_freq').value);
+        const sensMult = parseFloat(document.getElementById('eng_sensitive').value);
+        const aiMult = parseFloat(document.getElementById('eng_ai').value);
+        const cloudCost = parseFloat(document.getElementById('eng_cloud_cost').value) || 0;
+
+        // Lógica Base: 6h limpeza por tabela + 8h por KPI
+        let eng_base = (numTables * 20) + (numKpis * 20);
+        // Aplica Multiplicadores em cascata
+        let h_eng = eng_base * qualityMult * historyMult * freqMult * sensMult * aiMult;
+
+
+        // --- 3. VIZ ---
+        const numScreens = parseInt(document.getElementById('viz_screens').value) || 0;
+        const vizTypeMult = parseFloat(document.getElementById('viz_type').value);
+
+        // Lógica: 16h base por tela * Complexidade
+        let h_viz = (numScreens * 30) * vizTypeMult;
+
+
+        // --- 4. PO / GESTÃO ---
+        const docMult = parseFloat(document.getElementById('po_doc').value);
+        const availMult = parseFloat(document.getElementById('po_avail').value);
+        const natureMult = parseFloat(document.getElementById('po_nature').value);
+        
+        // Base: 20% da soma das horas técnicas
+        let totalTechHours = h_ing + h_eng + h_viz;
+        let h_pm = (totalTechHours * 0.20);
+
+        // PO sofre com falta de doc, indisponibilidade e inovação
+        h_pm = h_pm * docMult * availMult * natureMult;
+
+
+        // --- CÁLCULO FINAL ---
+        const c_ing = h_ing * rateIng;
+        const c_eng = h_eng * rateEng;
+        const c_viz = h_viz * rateViz;
+        const c_pm = h_pm * ratePm;
+
+        const totalProject = c_ing + c_eng + c_viz + c_pm + cloudCost;
+        const totalHours = totalTechHours + h_pm;
+
+        // --- UPDATE UI ---
+        document.getElementById('res_h_ing').innerText = Math.round(h_ing) + "h";
+        document.getElementById('res_c_ing').innerText = formatCurrency(c_ing);
+
+        document.getElementById('res_h_eng').innerText = Math.round(h_eng) + "h";
+        document.getElementById('res_c_eng').innerText = formatCurrency(c_eng);
+
+        document.getElementById('res_h_viz').innerText = Math.round(h_viz) + "h";
+        document.getElementById('res_c_viz').innerText = formatCurrency(c_viz);
+
+        document.getElementById('res_h_pm').innerText = Math.round(h_pm) + "h";
+        document.getElementById('res_c_pm').innerText = formatCurrency(c_pm);
+
+        document.getElementById('res_c_cloud').innerText = formatCurrency(cloudCost);
+
+        document.getElementById('res_total').innerText = formatCurrency(totalProject);
+        document.getElementById('res_days').innerText = "~" + Math.ceil(totalHours / 6) + " dias úteis (1 dev)";
+    }
+
+    function copySummary() {
+        const total = document.getElementById('res_total').innerText;
+        const days = document.getElementById('res_days').innerText;
+        
+        // Verifica se tem complexidade para avisar no resumo
+        const badgeActive = document.getElementById('badge-complex').classList.contains('active');
+        const complexText = badgeActive ? " (Alta Complexidade Ativa)" : "";
+
+        const text = `Orçamento Estimado de Dados:\n\nTotal: ${total}\nPrazo: ${days}\n\nDetalhes:\n- Ingestão: ${document.getElementById('res_c_ing').innerText}${complexText}\n- Engenharia: ${document.getElementById('res_c_eng').innerText}\n- Viz: ${document.getElementById('res_c_viz').innerText}\n- Gestão: ${document.getElementById('res_c_pm').innerText}\n- Cloud: ${document.getElementById('res_c_cloud').innerText}`;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Resumo copiado para a área de transferência!");
+        });
+    }
+
+    // Init
+    calculate();
+</script>
+
+</body>
+</html>

@@ -362,7 +362,7 @@
         <div class="result-section">
             <div class="cost-row">
                 <div>
-                    <div class="cost-label">Ingestão <span id="badge-complex" class="badge-alert">Alta Complexidade (30x)</span></div>
+                    <div class="cost-label">Ingestão <span id="badge-complex" class="badge-alert">Alta Complexidade</span></div>
                     <small id="res_h_ing">0h</small>
                 </div>
                 <div class="cost-val" id="res_c_ing">R$ 0,00</div>
@@ -522,7 +522,7 @@
         document.getElementById('res_c_cloud').innerText = formatCurrency(cloudCost);
 
         document.getElementById('res_total').innerText = formatCurrency(totalProject);
-        document.getElementById('res_days').innerText = "~" + Math.ceil(totalHours / 6) + " dias úteis (1 dev)";
+        document.getElementById('res_days').innerText = "~" + Math.ceil(totalHours / 6)/30 + " meses"; //apesar da conta ser feita para apenas 1 dev, experiencia mostra que o tempo total de projeto se aproxima disso
     }
 
     function copySummary() {
@@ -546,4 +546,5 @@
 
 </body>
 </html>
+
 

@@ -241,7 +241,7 @@
                         </div>
                         <div class="input-group">
                             <label>Total de Tabelas (Soma)</label>
-                            <input type="number" id="in_tables" value="5" min="1">
+                            <input type="number" id="in_tables" value="5" min="0">
                         </div>
                         <div class="input-group">
                             <label>Usa Legados / Web Scraping / PDF?</label>
@@ -263,7 +263,7 @@
                         <div class="input-group">
                             <label>Qualidade dos dados na origem?</label>
                             <select id="eng_quality">
-                                <option value="1.4">Baixa (Muito tratamento)</option>
+                                <option value="1.3">Baixa (Muito tratamento)</option>
                                 <option value="1.2" selected>Média</option>
                                 <option value="1.0">Alta (Dados limpos)</option>
                             </select>
@@ -272,7 +272,7 @@
                             <label>Necessidade de Carga Histórica?</label>
                             <select id="eng_history">
                                 <option value="1.0">Só Atual (D-1)</option>
-                                <option value="1.2">Histórico + Atual</option>
+                                <option value="1.1">Histórico + Atual</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -280,7 +280,7 @@
                             <select id="eng_freq">
                                 <option value="1.0">Diário/Semanal (Batch)</option>
                                 <option value="1.1">Intraday (Algumas vezes/dia)</option>
-                                <option value="1.5">Near-Real-Time (Streaming)</option>
+                                <option value="1.3">Near-Real-Time (Streaming)</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -294,7 +294,7 @@
                             <label>Uso de Inteligência Artificial?</label>
                             <select id="eng_ai">
                                 <option value="1.0">Não</option>
-                                <option value="1.3">Sim (+ Modelagem)</option>
+                                <option value="1.5">Sim (+ Modelagem)</option>
                             </select>
                         </div>
                         <div class="input-group" style="grid-column: 1 / -1;">
@@ -546,3 +546,4 @@
 
 </body>
 </html>
+
